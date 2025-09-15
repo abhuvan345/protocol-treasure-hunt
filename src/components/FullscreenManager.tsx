@@ -11,6 +11,7 @@ const FullscreenManager = ({ children }: FullscreenManagerProps) => {
   const [gameExited, setGameExited] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
   const [systemLocked, setSystemLocked] = useState(false);
+  const [showFullscreenPrompt, setShowFullscreenPrompt] = useState(false);
 
   // Function to start fullscreen mode when game begins
   const startFullscreenMode = async () => {
@@ -32,6 +33,18 @@ const FullscreenManager = ({ children }: FullscreenManagerProps) => {
       delete (window as any).startFullscreenMode;
     };
   }, []);
+
+  // Function to handle returning to fullscreen mode
+  const returnToFullscreen = async () => {
+    try {
+      if (document.documentElement.requestFullscreen) {
+        await document.documentElement.requestFullscreen();
+        setShowFullscreenPrompt(false);
+      }
+    } catch (err) {
+      console.warn("Could not re-enter fullscreen mode:", err);
+    }
+  };
 
   useEffect(() => {
     // Check if game has been completed on this system or if system is locked
@@ -102,48 +115,63 @@ const FullscreenManager = ({ children }: FullscreenManagerProps) => {
 
     // Handle fullscreen exit
     const handleFullscreenChange = () => {
+      // If we've exited fullscreen and the game is active
       if (!document.fullscreenElement && gameStarted) {
+        // Show the fullscreen prompt
+        setShowFullscreenPrompt(true);
+        
         if (!warningGiven) {
           setWarningGiven(true);
           toast({
-            title: "⚠️ Warning!",
-            description:
-              "Please stay in fullscreen mode. Exiting fullscreen again will end the game!",
-            variant: "destructive",
+            title: "🔒 Fullscreen Required",
+            description: "Please click the button to return to fullscreen mode.",
+            variant: "default",
             duration: 5000,
           });
-
-          // Try to re-enter fullscreen
-          setTimeout(() => {
-            if (document.documentElement.requestFullscreen) {
-              document.documentElement.requestFullscreen();
-            }
-          }, 1000);
         } else {
-          // Second violation - exit game
-          setGameExited(true);
           toast({
-            title: "🚫 Game Exited",
-            description:
-              "You have been removed from the game for exiting fullscreen mode.",
-            variant: "destructive",
-            duration: 10000,
+            title: "🔒 Stay Focused",
+            description: "Please return to fullscreen mode to continue your investigation.",
+            variant: "default",
+            duration: 3000,
           });
-
-          setTimeout(() => {
-            localStorage.setItem("wren-manor-system-completed", "true");
-            localStorage.removeItem("wren-manor-player");
-            localStorage.removeItem("wren-manor-game-session");
-            // Don't clear all localStorage to preserve system lock
-            window.location.href = "/";
-          }, 3000);
         }
+      } 
+      // If we're back in fullscreen mode, hide the prompt
+      else if (document.fullscreenElement) {
+        setShowFullscreenPrompt(false);
       }
     };
 
     // Handle keyboard shortcuts (prevent common shortcuts)
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!gameStarted) return;
+
+      // Try to prevent Escape key from exiting fullscreen mode
+      // and show a prompt if it does exit
+      if (e.key === "Escape" && document.fullscreenElement) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Show a toast message immediately
+        toast({
+          title: "🔒 Stay Focused",
+          description: "Press the button to remain in fullscreen mode.",
+          variant: "default",
+          duration: 3000,
+        });
+
+        // We need to handle the case where the escape key still exits fullscreen
+        // despite our efforts to prevent it (happens in many browsers)
+        setTimeout(() => {
+          if (!document.fullscreenElement) {
+            // If fullscreen was exited, show our manual re-enter prompt
+            setShowFullscreenPrompt(true);
+          }
+        }, 100);
+
+        return; // Exit early to prevent any other handling
+      }
 
       // Prevent Alt+Tab, Ctrl+T, Ctrl+W, Ctrl+N, etc.
       if (
@@ -190,14 +218,15 @@ const FullscreenManager = ({ children }: FullscreenManagerProps) => {
     if (gameStarted) {
       document.addEventListener("visibilitychange", handleVisibilityChange);
       document.addEventListener("fullscreenchange", handleFullscreenChange);
-      document.addEventListener("keydown", handleKeyDown);
+      // Use capture phase for keydown to ensure we catch escape before other handlers
+      document.addEventListener("keydown", handleKeyDown, true);
     }
 
     // Cleanup event listeners
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
-      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("keydown", handleKeyDown, true);
     };
   }, [warningGiven, toast, gameStarted]);
 
@@ -214,7 +243,6 @@ const FullscreenManager = ({ children }: FullscreenManagerProps) => {
           <p className="text-sm text-gray-400">
             Each system can only be used once to maintain game integrity.
           </p>
-          
         </div>
       </div>
     );
@@ -242,7 +270,55 @@ const FullscreenManager = ({ children }: FullscreenManagerProps) => {
     );
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+
+      {/* Fullscreen Prompt Overlay */}
+      {showFullscreenPrompt && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.95)",
+            zIndex: 9999,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            color: "white",
+            textAlign: "center",
+            padding: "20px",
+          }}
+        >
+          <h2 style={{ marginBottom: "20px", fontSize: "24px" }}>
+            Return to Fullscreen Mode
+          </h2>
+          <p style={{ marginBottom: "30px", fontSize: "16px" }}>
+            You must remain in fullscreen mode to continue your investigation.
+          </p>
+          <button
+            onClick={returnToFullscreen}
+            style={{
+              padding: "12px 24px",
+              backgroundColor: "#2563eb",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              fontSize: "16px",
+              cursor: "pointer",
+              fontWeight: "bold",
+            }}
+          >
+            Continue in Fullscreen
+          </button>
+        </div>
+      )}
+    </>
+  );
 };
 
 export default FullscreenManager;
