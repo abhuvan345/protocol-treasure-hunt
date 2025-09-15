@@ -30,7 +30,10 @@ import {
   type LeaderboardEntry,
   type GameProgress,
 } from "@/integrations/firebase/gameState";
+import { Timer } from "@/components/Timer";
 import { useToast } from "@/hooks/use-toast";
+import { useGameExitHandler } from "@/hooks/use-game-exit";
+import { isSystemLocked } from "@/lib/utils";
 
 const Leaderboard = () => {
   const navigate = useNavigate();
@@ -175,6 +178,9 @@ const Leaderboard = () => {
     };
   }, [toast]);
 
+  // Use our custom hook to handle game exit
+  useGameExitHandler(currentProgress);
+
   const refreshLeaderboard = async () => {
     setIsRefreshing(true);
     try {
@@ -188,12 +194,8 @@ const Leaderboard = () => {
     }
   };
 
-  const formatTime = (milliseconds: number) => {
-    if (milliseconds === 0) return "In Progress";
-    const minutes = Math.floor(milliseconds / 60000);
-    const seconds = Math.floor((milliseconds % 60000) / 1000);
-    return `${minutes}m ${seconds}s`;
-  };
+  // We'll use the Timer component directly instead of manually tracking elapsed times
+  // No need for elapsed time state or formatting functions
 
   const getProgressBadge = (progress: number) => {
     if (progress === 9)
@@ -380,9 +382,24 @@ const Leaderboard = () => {
               <ManorCardContent className="p-4">
                 <Clock className="h-8 w-8 text-accent mx-auto mb-2" />
                 <div className="text-2xl font-bold text-foreground">
-                  {leaderboard.length > 0 && leaderboard[0].totalTime > 0
-                    ? formatTime(leaderboard[0].totalTime)
-                    : "N/A"}
+                  {leaderboard.length > 0 && leaderboard[0].totalTime > 0 ? (
+                    <Timer
+                      startTime={
+                        leaderboard[0].timestamp - leaderboard[0].totalTime
+                      }
+                      endTime={
+                        leaderboard[0].isComplete
+                          ? leaderboard[0].timestamp
+                          : undefined
+                      }
+                      format="withUnits"
+                      showIcon={false}
+                      textClassName="text-2xl font-bold"
+                      animate={!leaderboard[0].isComplete && !isSystemLocked()}
+                    />
+                  ) : (
+                    "N/A"
+                  )}
                 </div>
                 <div className="text-sm text-muted-foreground">Best Time</div>
               </ManorCardContent>
@@ -568,7 +585,16 @@ const Leaderboard = () => {
                               {Math.round(progressPercentage)}% Complete
                             </motion.div>
                             <div className="text-xs text-muted-foreground">
-                              {formatTime(entry.completionTime)}
+                              <Timer
+                                startTime={entry.timestamp - entry.totalTime}
+                                endTime={
+                                  entry.isComplete ? entry.timestamp : undefined
+                                }
+                                format="withUnits"
+                                showIcon={false}
+                                textClassName="text-xs"
+                                animate={!entry.isComplete && !isSystemLocked()}
+                              />
                             </div>
                             {entry.currentProgress === 9 && (
                               <motion.div
@@ -660,7 +686,16 @@ const Leaderboard = () => {
                         {entry.currentProgress}/9
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {formatTime(entry.completionTime)}
+                        <Timer
+                          startTime={entry.timestamp - entry.totalTime}
+                          endTime={
+                            entry.isComplete ? entry.timestamp : undefined
+                          }
+                          format="withUnits"
+                          showIcon={false}
+                          textClassName="text-xs"
+                          animate={!entry.isComplete && !isSystemLocked()}
+                        />
                       </div>
                     </motion.div>
                   ))}

@@ -21,6 +21,9 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { getGameProgress, resetGameProgress } from "@/lib/gameState";
+import { Timer } from "@/components/Timer";
+import { useGameExitHandler } from "@/hooks/use-game-exit";
+import { isSystemLocked } from "@/lib/utils";
 
 const Results = () => {
   const navigate = useNavigate();
@@ -76,19 +79,20 @@ const Results = () => {
       ].every(Boolean);
 
       if (allPuzzlesCompleted) {
-        localStorage.setItem("wren-manor-system-completed", "true");
-        localStorage.removeItem("wren-manor-game-session");
+        // Import the utility to stop the timer
+        import("@/lib/gameExit").then((module) => {
+          const { handleSystemLock } = module;
+          // Stop the timer before locking the system
+          handleSystemLock().then(() => {
+            localStorage.setItem("wren-manor-system-completed", "true");
+            localStorage.removeItem("wren-manor-game-session");
+          });
+        });
       }
     };
 
     loadProgress();
   }, [navigate]);
-
-  const formatTime = (milliseconds: number) => {
-    const minutes = Math.floor(milliseconds / 60000);
-    const seconds = Math.floor((milliseconds % 60000) / 1000);
-    return `${minutes}m ${seconds}s`;
-  };
 
   const handlePlayAgain = async () => {
     if (progress?.playerName && progress?.teamId) {
@@ -102,6 +106,9 @@ const Results = () => {
   const handleViewLeaderboard = () => {
     navigate("/leaderboard");
   };
+
+  // Use our custom hook to handle game exit
+  useGameExitHandler(progress);
 
   if (loading || !progress) {
     return null;
@@ -121,11 +128,6 @@ const Results = () => {
 
   const totalPuzzles = 9;
   const allCompleted = completedPuzzles === totalPuzzles;
-
-  const completionTime = progress.completionTime || 0;
-  const totalTime = completionTime
-    ? formatTime(completionTime)
-    : "Still investigating...";
 
   return (
     <Layout>
@@ -366,7 +368,20 @@ const Results = () => {
                       Investigation Time
                     </span>
                   </div>
-                  <span className="font-bold text-accent">{totalTime}</span>
+                  <span className="font-bold text-accent">
+                    <Timer
+                      startTime={progress?.startTime || 0}
+                      endTime={progress?.completionTime}
+                      format="withUnits"
+                      showIcon={false}
+                      animate={
+                        progress?.startTime > 0 &&
+                        !progress?.completionTime &&
+                        !isSystemLocked()
+                      }
+                      fallback="Still investigating..."
+                    />
+                  </span>
                 </div>
 
                 <div className="flex items-center justify-between p-4 bg-card/30 rounded-lg">

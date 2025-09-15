@@ -29,17 +29,34 @@ function initializeUnlockShortcut() {
     if (keySequence.includes(UNLOCK_CODE)) {
       console.log("🎯 UNLOCK SEQUENCE DETECTED!");
 
-      // Unlock the system
-      localStorage.removeItem("wren-manor-system-completed");
-      keySequence = "";
+      // Import the utility to handle any active timers before unlocking
+      import('./gameExit').then(module => {
+        const { handleSystemLock } = module;
+        // Stop any running timers before unlocking the system
+        handleSystemLock().then(() => {
+          // Unlock the system
+          localStorage.removeItem("wren-manor-system-completed");
+          keySequence = "";
 
-      // Show immediate feedback
-      alert("🔓 System Unlocked!\nCoordinator access granted.");
+          // Show immediate feedback
+          alert("🔓 System Unlocked!\nCoordinator access granted.");
 
-      // Reload page
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
+          // Reload page
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        });
+      }).catch(error => {
+        console.error("Error handling timer before unlock:", error);
+        
+        // Fallback - continue with unlock even if timer handling fails
+        localStorage.removeItem("wren-manor-system-completed");
+        keySequence = "";
+        alert("🔓 System Unlocked!\nCoordinator access granted.");
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      });
 
       return;
     }

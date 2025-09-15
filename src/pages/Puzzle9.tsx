@@ -110,6 +110,7 @@ const Puzzle9 = () => {
         p9: true,
         currentPage: 9,
         completed: true,
+        completionTime: Date.now(), // Set the completion time when the player solves the final puzzle
       };
       await saveGameProgress(newProgress);
       setProgress(newProgress);

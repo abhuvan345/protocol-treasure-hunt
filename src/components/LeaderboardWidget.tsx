@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Trophy, Clock, Users } from "lucide-react";
+import { Trophy, Users } from "lucide-react";
 import {
   ManorCard,
   ManorCardContent,
@@ -12,18 +12,20 @@ import {
   subscribeToLeaderboard,
   type LeaderboardEntry,
 } from "@/integrations/firebase/gameState";
+import { Timer } from "@/components/Timer";
+import { isSystemLocked } from "@/lib/utils";
 
 export const LeaderboardWidget = () => {
   const [topTeams, setTopTeams] = useState<LeaderboardEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    console.log("🎯 LeaderboardWidget: Setting up Firebase subscription");
+    console.log(" LeaderboardWidget: Setting up Firebase subscription");
 
     // Subscribe to real-time leaderboard updates
     const unsubscribe = subscribeToLeaderboard((leaderboardData) => {
       console.log(
-        "🎯 LeaderboardWidget: Received Firebase data:",
+        " LeaderboardWidget: Received Firebase data:",
         leaderboardData
       );
 
@@ -34,28 +36,24 @@ export const LeaderboardWidget = () => {
     });
 
     return () => {
-      console.log("🎯 LeaderboardWidget: Cleaning up subscription");
+      console.log(" LeaderboardWidget: Cleaning up subscription");
       unsubscribe();
     };
   }, []);
 
-  const formatTime = (milliseconds: number) => {
-    const totalSeconds = Math.floor(milliseconds / 1000);
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
-  };
+  // We'll use the Timer component instead of manually tracking elapsed time
+  // No need for state variables or interval effects
 
   const getRankIcon = (index: number) => {
     switch (index) {
       case 0:
-        return "🥇";
+        return "";
       case 1:
-        return "🥈";
+        return "";
       case 2:
-        return "🥉";
+        return "";
       default:
-        return "🏅";
+        return "";
     }
   };
 
@@ -110,12 +108,18 @@ export const LeaderboardWidget = () => {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="flex items-center space-x-1 text-xs text-accent">
-                    <Clock className="h-3 w-3" />
-                    <span>{formatTime(team.completionTime)}</span>
+                  <div className="text-xs text-accent">
+                    <Timer
+                      startTime={team.timestamp - team.totalTime}
+                      endTime={team.isComplete ? team.timestamp : undefined}
+                      iconClassName="h-3 w-3 mr-1"
+                      textClassName="text-xs"
+                      animate={!team.isComplete && !isSystemLocked()}
+                      fallback="--:--"
+                    />
                   </div>
                   <Badge variant="outline" className="text-xs mt-1">
-                    {team.puzzlesCompleted}/9
+                    {team.completedPuzzles}/9
                   </Badge>
                 </div>
               </motion.div>

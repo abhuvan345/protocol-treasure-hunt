@@ -102,7 +102,14 @@ const FullscreenManager = ({ children }: FullscreenManagerProps) => {
           });
 
           // Clear game data and redirect
-          setTimeout(() => {
+          setTimeout(async () => {
+            // Import dynamically to avoid circular dependencies
+            const { handleSystemLock } = await import("@/lib/gameExit");
+
+            // Stop the timer before locking the system
+            await handleSystemLock();
+
+            // Lock the system
             localStorage.setItem("wren-manor-system-completed", "true");
             localStorage.removeItem("wren-manor-player");
             localStorage.removeItem("wren-manor-game-session");
@@ -119,24 +126,26 @@ const FullscreenManager = ({ children }: FullscreenManagerProps) => {
       if (!document.fullscreenElement && gameStarted) {
         // Show the fullscreen prompt
         setShowFullscreenPrompt(true);
-        
+
         if (!warningGiven) {
           setWarningGiven(true);
           toast({
             title: "🔒 Fullscreen Required",
-            description: "Please click the button to return to fullscreen mode.",
+            description:
+              "Please click the button to return to fullscreen mode.",
             variant: "default",
             duration: 5000,
           });
         } else {
           toast({
             title: "🔒 Stay Focused",
-            description: "Please return to fullscreen mode to continue your investigation.",
+            description:
+              "Please return to fullscreen mode to continue your investigation.",
             variant: "default",
             duration: 3000,
           });
         }
-      } 
+      }
       // If we're back in fullscreen mode, hide the prompt
       else if (document.fullscreenElement) {
         setShowFullscreenPrompt(false);
@@ -203,7 +212,14 @@ const FullscreenManager = ({ children }: FullscreenManagerProps) => {
             duration: 10000,
           });
 
-          setTimeout(() => {
+          setTimeout(async () => {
+            // Import dynamically to avoid circular dependencies
+            const { handleSystemLock } = await import("@/lib/gameExit");
+
+            // Stop the timer before locking the system
+            await handleSystemLock();
+
+            // Lock the system
             localStorage.setItem("wren-manor-system-completed", "true");
             localStorage.removeItem("wren-manor-player");
             localStorage.removeItem("wren-manor-game-session");

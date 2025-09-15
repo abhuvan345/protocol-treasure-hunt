@@ -19,6 +19,7 @@ import {
   type GameProgress,
 } from "@/lib/gameState";
 import { useToast } from "@/hooks/use-toast";
+import { useGameExitHandler } from "@/hooks/use-game-exit";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -42,15 +43,37 @@ const Home = () => {
   const handleUnlock = () => {
     if (pin === COORDINATOR_PIN) {
       setIsUnlocking(true);
-      localStorage.removeItem("wren-manor-system-completed");
-      toast({
-        title: "🔓 System Unlocked",
-        description: "The system has been unlocked by coordinator access.",
-        duration: 3000,
-      });
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
+
+      // Import the utility to handle any active timers before unlocking
+      import("@/lib/gameExit")
+        .then((module) => {
+          const { handleSystemLock } = module;
+          // Stop any running timers before unlocking the system
+          handleSystemLock().then(() => {
+            localStorage.removeItem("wren-manor-system-completed");
+            toast({
+              title: "🔓 System Unlocked",
+              description:
+                "The system has been unlocked by coordinator access.",
+              duration: 3000,
+            });
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
+          });
+        })
+        .catch(() => {
+          // Fallback - continue with unlock even if timer handling fails
+          localStorage.removeItem("wren-manor-system-completed");
+          toast({
+            title: "🔓 System Unlocked",
+            description: "The system has been unlocked by coordinator access.",
+            duration: 3000,
+          });
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        });
     } else {
       toast({
         title: "❌ Invalid PIN",
@@ -127,6 +150,9 @@ const Home = () => {
 
     loadProgress();
   }, []);
+
+  // Use our custom hook to handle game exit
+  useGameExitHandler(progress);
 
   // Initialize global keyboard shortcut once
   useEffect(() => {
@@ -233,7 +259,7 @@ const Home = () => {
         }),
         playerName: playerName.trim(),
         teamId: teamId.trim().toUpperCase(),
-        startTime: progress?.startTime || Date.now(),
+        startTime: Date.now(), // Always start the timer when Begin Investigation is clicked
       };
 
       await saveGameProgress(newProgress);
@@ -268,7 +294,7 @@ const Home = () => {
     }
   };
 
-  const handleContinueGame = () => {
+  const handleContinueGame = async () => {
     if (!progress) return;
 
     // Check if system is locked
@@ -281,6 +307,16 @@ const Home = () => {
         variant: "destructive",
       });
       return;
+    }
+
+    // If this is the first time continuing (startTime is 0), set the startTime to now
+    if (progress.startTime === 0) {
+      const updatedProgress = {
+        ...progress,
+        startTime: Date.now(),
+      };
+      await saveGameProgress(updatedProgress);
+      setProgress(updatedProgress);
     }
 
     if (progress.p9) {
@@ -320,11 +356,7 @@ const Home = () => {
   // Check if system is locked and show appropriate message
   const systemCompleted = localStorage.getItem("wren-manor-system-completed");
   if (systemCompleted === "true") {
-    const [showPinInput, setShowPinInput] = useState(false);
-    const [pin, setPin] = useState("");
-    const [isUnlocking, setIsUnlocking] = useState(false);
-
-    const COORDINATOR_PIN = "2024";
+    // No need to redefine these state variables as they are already defined at component level
 
     const handleUnlock = () => {
       if (pin === COORDINATOR_PIN) {
