@@ -50,7 +50,7 @@ const Puzzle6 = () => {
           return;
         }
         
-        console.log(`Loading progress for ${playerName} (Team: ${teamId})`);
+        console.log(Loading progress for ${playerName} (Team: ${teamId}));
         const gameProgress = await getGameProgress(playerName, teamId);
         setProgress(gameProgress);
         
