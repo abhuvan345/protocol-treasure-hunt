@@ -74,7 +74,7 @@ const Puzzle4 = () => {
     loadProgress();
   }, [navigate]);
 
-  // Updated buggy Python code display
+  // Buggy Python code displayed to the user
   const buggyCode = `def find_murder_weapon():
     weapons = ["dagger", "rope", "candlestick", "poison", "blunt_object"]
     clues = [1, 2, 3, 4, 5]
@@ -87,8 +87,10 @@ const Puzzle4 = () => {
     
     # The chef's alibi reveals the final piece
     chef_clue = maid_clue - 1      
+    
     # Calculate the weapon index
     weapon_index = chef_clue % len(weapons)      
+    
     # Get the weapon name
     weapon = weapons[weapon_index]
     
@@ -110,45 +112,44 @@ print(f"The PIN is: {result}")`;
     "The PIN should be 4 digits representing the weapon name"
   ];
 
-  // Updated correct PIN to 4177
+  // The correct PIN
   const correctPIN = "4177"; // D-A-G-G = 4-1-7-7
 
+  /**
+   * Handles submission of the input box
+   * The user must type EXACTLY "4177" to unlock the phone keypad page
+   */
   const handleCodeSubmit = () => {
     if (!userCode.trim()) {
       toast({
-        title: "Enter Your Code",
-        description: "Please debug the Python code and enter your corrected version.",
+        title: "Input Required",
+        description: "Please enter the correct PIN in the input box.",
         variant: "destructive"
       });
       return;
     }
 
-    try {
-      // Updated check to validate correct solution
-      if (userCode.includes("4177") || userCode.includes("dagger") || userCode.includes("weapon_index = 0")) {
-        setDebugResult("Code debugging successful! The PIN is: 4177");
-        setShowKeypad(true);
-        toast({
-          title: "🐍 Code Debugged!",
-          description: "You found the bug! Now enter the PIN on the keypad.",
-          duration: 3000,
-        });
-      } else {
-        toast({
-          title: "Incorrect Debug",
-          description: "The code still has bugs. Look more carefully at the array indexing and modulo operation.",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
+    if (userCode.trim() === correctPIN) {
+      setDebugResult("Correct code entered! You can now unlock the phone using the keypad.");
+      setShowKeypad(true);
       toast({
-        title: "Invalid Code",
-        description: "Please check your Python syntax and try again.",
+        title: "✅ Correct Code!",
+        description: "Now enter the same code using the keypad to unlock the phone.",
+        duration: 3000,
+      });
+    } else {
+      toast({
+        title: "Incorrect Code",
+        description: "Only the exact PIN '4177' will unlock the phone keypad.",
         variant: "destructive"
       });
     }
   };
 
+  /**
+   * Handles the keypad input.
+   * The user must also type 4177 on the keypad to fully unlock.
+   */
   const handleKeypadComplete = async (pin: string) => {
     if (pin === correctPIN) {
       const newProgress = {
@@ -163,8 +164,8 @@ print(f"The PIN is: {result}")`;
       setSolved(true);
       
       toast({
-        title: "🔓 PIN Correct!",
-        description: "You've unlocked the chef's secret! Proceeding to contradiction analysis...",
+        title: "🔓 Phone Unlocked!",
+        description: "The phone has been successfully unlocked. Moving to the next puzzle...",
         duration: 3000,
       });
 
@@ -180,7 +181,7 @@ print(f"The PIN is: {result}")`;
     } else {
       toast({
         title: "Incorrect PIN",
-        description: "That's not the right PIN. Check your debugging work.",
+        description: "The phone remains locked. Please enter the correct PIN: 4177.",
         variant: "destructive"
       });
     }
@@ -212,7 +213,7 @@ print(f"The PIN is: {result}")`;
           </h1>
           <p className="text-muted-foreground max-w-2xl mx-auto font-body">
             The chef left behind a buggy Python script that reveals a 4-digit PIN. 
-            Debug the code to find the secret number that unlocks his phone.
+            Type the exact PIN into the box, then use the phone keypad to fully unlock the phone.
           </p>
         </motion.div>
 
@@ -229,7 +230,7 @@ print(f"The PIN is: {result}")`;
                 </div>
                 <ManorCardTitle>Debug the Python Code</ManorCardTitle>
                 <p className="text-muted-foreground">
-                  Find and fix the bugs in this Python script to reveal the 4-digit PIN
+                  Enter the final PIN below. Only when you enter "4177" will the phone keypad appear.
                 </p>
               </ManorCardHeader>
               
@@ -244,17 +245,17 @@ print(f"The PIN is: {result}")`;
                   </div>
                 </div>
 
-                {/* User Code Input */}
+                {/* User PIN Input */}
                 <div className="space-y-3">
                   <Label htmlFor="userCode" className="font-manor">
-                    Your Corrected Code:
+                    Enter PIN:
                   </Label>
                   <Textarea
                     id="userCode"
                     value={userCode}
                     onChange={(e) => setUserCode(e.target.value)}
-                    placeholder="Enter your corrected Python code here..."
-                    className="min-h-32 font-mono text-sm bg-input/50 border-border focus:border-primary"
+                    placeholder="Type 4177 here to proceed..."
+                    className="min-h-16 font-mono text-sm bg-input/50 border-border focus:border-primary"
                     disabled={solved}
                   />
                 </div>
@@ -270,61 +271,16 @@ print(f"The PIN is: {result}")`;
                   </motion.div>
                 )}
 
-                {/* Hints Section */}
-                {showHints && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    className="p-4 bg-accent/10 border border-accent/20 rounded-lg"
+                {/* Action Button */}
+                <div className="flex justify-end">
+                  <ManorButton
+                    onClick={handleCodeSubmit}
+                    disabled={!userCode.trim()}
+                    size="lg"
                   >
-                    <h4 className="font-manor font-semibold text-accent mb-3">Debugging Hints:</h4>
-                    <div className="space-y-2">
-                      {hints.map((hint, index) => (
-                        <p key={index} className="text-accent-foreground font-body text-sm">
-                          • {hint}
-                        </p>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* Action Buttons */}
-                <div className="flex flex-col space-y-3">
-                  {solved ? (
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="space-y-4"
-                    >
-                      <div className="flex items-center justify-center space-x-2 p-4 bg-primary/10 border border-primary/30 rounded-lg">
-                        <CheckCircle2 className="h-5 w-5 text-primary" />
-                        <span className="text-primary font-semibold">
-                          Code Debugged Successfully!
-                        </span>
-                      </div>
-                      <ManorButton onClick={handleNext} size="lg" className="w-full">
-                        Continue to Next Puzzle
-                      </ManorButton>
-                    </motion.div>
-                  ) : (
-                    <div className="flex justify-between">
-                      <ManorButton
-                        variant="ghost"
-                        onClick={() => setShowHints(!showHints)}
-                      >
-                        {showHints ? "Hide Hints" : "Show Hints"}
-                      </ManorButton>
-                      
-                      <ManorButton
-                        onClick={handleCodeSubmit}
-                        disabled={!userCode.trim()}
-                        size="lg"
-                      >
-                        <Bug className="w-4 h-4 mr-2" />
-                        Debug Code
-                      </ManorButton>
-                    </div>
-                  )}
+                    <Bug className="w-4 h-4 mr-2" />
+                    Submit PIN
+                  </ManorButton>
                 </div>
               </ManorCardContent>
             </ManorCard>
@@ -339,7 +295,7 @@ print(f"The PIN is: {result}")`;
             <PhoneKeypad
               onComplete={handleKeypadComplete}
               title="Enter the 4-Digit PIN"
-              description="Use the keypad to enter the PIN you discovered"
+              description="Use the keypad to enter 4177"
             />
           </motion.div>
         )}
