@@ -99,7 +99,7 @@ const Puzzle5 = () => {
           return;
         }
         
-        console.log(`Loading progress for ${playerName} (Team: ${teamId})`);
+        console.log(Loading progress for ${playerName} (Team: ${teamId}));
         const gameProgress = await getGameProgress(playerName, teamId);
         setProgress(gameProgress);
         
@@ -150,7 +150,7 @@ const Puzzle5 = () => {
       setPuzzleSolved(true);
       
       toast({
-        title: "🕵️ Contradictions Found!",
+        title: "🕵 Contradictions Found!",
         description: "The lies have been exposed! Proceeding to digital investigation...",
         duration: 3000,
       });
@@ -168,7 +168,7 @@ const Puzzle5 = () => {
     } else {
       toast({
         title: "Insufficient Evidence",
-        description: `You need to identify at least 3 contradictions to expose the lies. Found: ${found.length}/3`,
+        description: You need to identify at least 3 contradictions to expose the lies. Found: ${found.length}/3,
         variant: "destructive",
       });
     }
