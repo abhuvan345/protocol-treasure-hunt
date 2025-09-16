@@ -2,22 +2,37 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Layout } from "@/components/Layout";
-import { ManorCard, ManorCardHeader, ManorCardTitle, ManorCardContent } from "@/components/ui/manor-card";
+import {
+  ManorCard,
+  ManorCardHeader,
+  ManorCardTitle,
+  ManorCardContent,
+} from "@/components/ui/manor-card";
 import { ManorButton } from "@/components/ui/manor-button";
 import { PhoneKeypad } from "@/components/ui/phone-keypad";
 import { toast } from "@/hooks/use-toast";
 import { getGameProgress, saveGameProgress } from "@/lib/gameState";
-import { Code, Bug, CheckCircle2 } from "lucide-react";
-import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
+import { Code, Bug } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+
+// Type for game progress
+interface GameProgress {
+  playerName: string;
+  teamId: string;
+  p1: boolean;
+  p2: boolean;
+  p3: boolean;
+  p4: boolean;
+  currentPage: number;
+  killer?: string;
+}
 
 const Puzzle4 = () => {
   const navigate = useNavigate();
-  const [progress, setProgress] = useState<any>(null);
+  const [progress, setProgress] = useState<GameProgress | null>(null);
   const [loading, setLoading] = useState(true);
   const [userCode, setUserCode] = useState("");
-  const [showHints, setShowHints] = useState(false);
   const [solved, setSolved] = useState(false);
   const [showKeypad, setShowKeypad] = useState(false);
   const [debugResult, setDebugResult] = useState("");
@@ -27,50 +42,54 @@ const Puzzle4 = () => {
     const loadProgress = async () => {
       try {
         setLoading(true);
-        const stored = localStorage.getItem('wren-manor-player');
-        let playerName = '';
-        let teamId = '';
-        
+        const stored = localStorage.getItem("wren-manor-player");
+        let playerName = "";
+        let teamId = "";
+
         if (stored) {
           const playerData = JSON.parse(stored);
-          playerName = playerData.playerName || '';
-          teamId = playerData.teamId || '';
+          playerName = playerData.playerName || "";
+          teamId = playerData.teamId || "";
         }
-        
+
         if (!playerName || !teamId) {
-          console.log('No player data found, redirecting to home...');
-          navigate('/');
+          console.log("No player data found, redirecting to home...");
+          navigate("/");
           return;
         }
-        
-        console.log(Loading progress for ${playerName} (Team: ${teamId}));
+
+        console.log(
+          `Loading progress for ${playerName} (Team: ${teamId})`
+        );
         const gameProgress = await getGameProgress(playerName, teamId);
         setProgress(gameProgress);
         setSolved(gameProgress.p4);
-        
+
         // Check if previous puzzles are incomplete
         if (!gameProgress.p1 || !gameProgress.p2 || !gameProgress.p3) {
-          console.log('Previous puzzles incomplete, redirecting...');
-          if (!gameProgress.p1) navigate('/puzzle-1');
-          else if (!gameProgress.p2) navigate('/puzzle-2');
-          else navigate('/puzzle-3');
+          console.log("Previous puzzles incomplete, redirecting...");
+          if (!gameProgress.p1) navigate("/puzzle-1");
+          else if (!gameProgress.p2) navigate("/puzzle-2");
+          else navigate("/puzzle-3");
           return;
         }
 
         // If puzzle already completed, redirect to next
         if (gameProgress.p4 && gameProgress.currentPage > 3) {
-          console.log('Puzzle 4 already completed, redirecting to next puzzle...');
-          navigate('/puzzle-5');
+          console.log(
+            "Puzzle 4 already completed, redirecting to next puzzle..."
+          );
+          navigate("/puzzle-5");
           return;
         }
       } catch (error) {
-        console.error('Error loading progress:', error);
-        navigate('/');
+        console.error("Error loading progress:", error);
+        navigate("/");
       } finally {
         setLoading(false);
       }
     };
-    
+
     loadProgress();
   }, [navigate]);
 
@@ -105,32 +124,24 @@ const Puzzle4 = () => {
 result = find_murder_weapon()
 print(f"The PIN is: {result}")`;
 
-  const hints = [
-    "Look for off-by-one errors in array indexing",
-    "Check if the modulo operation is working correctly",
-    "Verify the character-to-number conversion",
-    "The PIN should be 4 digits representing the weapon name"
-  ];
-
   // The correct PIN
   const correctPIN = "4177"; // D-A-G-G = 4-1-7-7
 
-  /**
-   * Handles submission of the input box
-   * The user must type EXACTLY "4177" to unlock the phone keypad page
-   */
+  /** Handles submission of the input box */
   const handleCodeSubmit = () => {
     if (!userCode.trim()) {
       toast({
         title: "Input Required",
         description: "Please enter the correct PIN in the input box.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
 
     if (userCode.trim() === correctPIN) {
-      setDebugResult("Correct code entered! You can now unlock the phone using the keypad.");
+      setDebugResult(
+        "Correct code entered! You can now unlock the phone using the keypad."
+      );
       setShowKeypad(true);
       toast({
         title: "✅ Correct Code!",
@@ -141,54 +152,53 @@ print(f"The PIN is: {result}")`;
       toast({
         title: "Incorrect Code",
         description: "Only the exact PIN '4177' will unlock the phone keypad.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
 
-  /**
-   * Handles the keypad input.
-   * The user must also type 4177 on the keypad to fully unlock.
-   */
+  /** Handles the keypad input */
   const handleKeypadComplete = async (pin: string) => {
+    if (!progress) return;
+
     if (pin === correctPIN) {
-      const newProgress = {
+      const newProgress: GameProgress = {
         ...progress,
         p4: true,
         killer: "Marcel",
-        currentPage: 4
+        currentPage: 4,
       };
-      
+
       setProgress(newProgress);
       await saveGameProgress(newProgress);
       setSolved(true);
-      
+
       toast({
         title: "🔓 Phone Unlocked!",
-        description: "The phone has been successfully unlocked. Moving to the next puzzle...",
+        description:
+          "The phone has been successfully unlocked. Moving to the next puzzle...",
         duration: 3000,
       });
 
-      const playerData = {
-        playerName: newProgress.playerName,
-        teamId: newProgress.teamId
-      };
-      localStorage.setItem('wren-manor-player', JSON.stringify(playerData));
+      // Keep player identity in localStorage
+      localStorage.setItem(
+        "wren-manor-player",
+        JSON.stringify({
+          playerName: newProgress.playerName,
+          teamId: newProgress.teamId,
+        })
+      );
 
       setTimeout(() => {
-        navigate('/puzzle-5');
+        navigate("/puzzle-5");
       }, 2000);
     } else {
       toast({
         title: "Incorrect PIN",
         description: "The phone remains locked. Please enter the correct PIN: 4177.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
-  };
-
-  const handleNext = () => {
-    navigate("/puzzle-5");
   };
 
   if (loading || !progress) {
@@ -199,21 +209,25 @@ print(f"The PIN is: {result}")`;
     <Layout>
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header */}
-        <motion.div 
+        <motion.div
           className="text-center space-y-4"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <Badge variant="outline" className="text-primary border-primary/30 bg-primary/10">
+          <Badge
+            variant="outline"
+            className="text-primary border-primary/30 bg-primary/10"
+          >
             Puzzle 4 of 9
           </Badge>
           <h1 className="font-manor text-4xl font-bold text-foreground">
             The Chef's Secret Code
           </h1>
           <p className="text-muted-foreground max-w-2xl mx-auto font-body">
-            The chef left behind a buggy Python script that reveals a 4-digit PIN. 
-            Type the exact PIN into the box, then use the phone keypad to fully unlock the phone.
+            The chef left behind a buggy Python script that reveals a 4-digit
+            PIN. Type the exact PIN into the box, then use the phone keypad to
+            fully unlock the phone.
           </p>
         </motion.div>
 
@@ -230,10 +244,11 @@ print(f"The PIN is: {result}")`;
                 </div>
                 <ManorCardTitle>Debug the Python Code</ManorCardTitle>
                 <p className="text-muted-foreground">
-                  Enter the final PIN below. Only when you enter "4177" will the phone keypad appear.
+                  Enter the final PIN below. Only when you enter "4177" will the
+                  phone keypad appear.
                 </p>
               </ManorCardHeader>
-              
+
               <ManorCardContent className="space-y-6">
                 {/* Buggy Code Display */}
                 <div className="space-y-3">
@@ -241,7 +256,9 @@ print(f"The PIN is: {result}")`;
                     Buggy Python Code:
                   </Label>
                   <div className="bg-muted/20 border border-border rounded-lg p-4 font-mono text-sm overflow-x-auto">
-                    <pre className="whitespace-pre-wrap text-foreground">{buggyCode}</pre>
+                    <pre className="whitespace-pre-wrap text-foreground">
+                      {buggyCode}
+                    </pre>
                   </div>
                 </div>
 
@@ -250,12 +267,12 @@ print(f"The PIN is: {result}")`;
                   <Label htmlFor="userCode" className="font-manor">
                     Enter PIN:
                   </Label>
-                  <Textarea
+                  <input
                     id="userCode"
                     value={userCode}
                     onChange={(e) => setUserCode(e.target.value)}
                     placeholder="Type 4177 here to proceed..."
-                    className="min-h-16 font-mono text-sm bg-input/50 border-border focus:border-primary"
+                    className="w-full px-4 py-2 rounded-lg border border-border font-mono text-sm bg-input/50 focus:border-primary"
                     disabled={solved}
                   />
                 </div>
@@ -308,7 +325,8 @@ print(f"The PIN is: {result}")`;
           className="text-center"
         >
           <p className="text-sm text-muted-foreground max-w-md mx-auto font-detective italic">
-            "The chef's phone holds the key to his alibi, but only the correct code will unlock its secrets..."
+            "The chef's phone holds the key to his alibi, but only the correct
+            code will unlock its secrets..."
           </p>
         </motion.div>
       </div>
