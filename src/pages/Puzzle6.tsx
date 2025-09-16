@@ -7,7 +7,7 @@ import { ManorButton } from '@/components/ui/manor-button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Database, Terminal, Search, CheckCircle } from 'lucide-react';
+import { Database, Terminal, CheckCircle } from 'lucide-react';
 import { getGameProgress, saveGameProgress } from '@/lib/gameState';
 import { useToast } from '@/hooks/use-toast';
 
@@ -50,7 +50,7 @@ const Puzzle6 = () => {
           return;
         }
         
-        console.log(Loading progress for ${playerName} (Team: ${teamId}));
+        console.log(`Loading progress for ${playerName} (Team: ${teamId})`);
         const gameProgress = await getGameProgress(playerName, teamId);
         setProgress(gameProgress);
         
@@ -182,7 +182,7 @@ const Puzzle6 = () => {
           <ManorCardHeader>
             <ManorCardTitle>SQL Query Terminal</ManorCardTitle>
             <ManorCardDescription>
-            
+              Type your SQL-like query below
             </ManorCardDescription>
           </ManorCardHeader>
           <ManorCardContent className="space-y-4">
