@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Layout } from '@/components/Layout';
-import { ManorCard, ManorCardContent, ManorCardDescription, ManorCardHeader, ManorCardTitle } from '@/components/ui/manor-card';
+import { ManorCard, ManorCardContent, ManorCardHeader, ManorCardTitle } from '@/components/ui/manor-card';
 import { ManorButton } from '@/components/ui/manor-button';
 import { Badge } from '@/components/ui/badge';
 import { MessageSquare, Search, CheckCircle } from 'lucide-react';
@@ -99,7 +99,7 @@ const Puzzle5 = () => {
           return;
         }
         
-        console.log(Loading progress for ${playerName} (Team: ${teamId}));
+        console.log(`Loading progress for ${playerName} (Team: ${teamId})`);
         const gameProgress = await getGameProgress(playerName, teamId);
         setProgress(gameProgress);
         
@@ -168,7 +168,7 @@ const Puzzle5 = () => {
     } else {
       toast({
         title: "Insufficient Evidence",
-        description: You need to identify at least 3 contradictions to expose the lies. Found: ${found.length}/3,
+        description: `You need to identify at least 3 contradictions to expose the lies. Found: ${found.length}/3`,
         variant: "destructive",
       });
     }
