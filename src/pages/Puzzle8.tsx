@@ -227,7 +227,7 @@ const Puzzle8 = () => {
           </div>
 
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto font-detective">
-            this is a 5-letter word puzzle try to find the word.
+            This is a 5-letter word puzzle try to find the word.
           </p>
         </div>
 
