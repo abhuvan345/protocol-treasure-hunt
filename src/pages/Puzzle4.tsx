@@ -195,7 +195,7 @@ print(f"The PIN is: {result}")`;
     } else {
       toast({
         title: "Incorrect PIN",
-        description: "The phone remains locked. Please enter the correct PIN: 4177.",
+        description: "The phone remains locked. Please enter the correct PIN.",
         variant: "destructive",
       });
     }
@@ -244,7 +244,7 @@ print(f"The PIN is: {result}")`;
                 </div>
                 <ManorCardTitle>Debug the Python Code</ManorCardTitle>
                 <p className="text-muted-foreground">
-                  Enter the final PIN below. Only when you enter "4177" will the
+                  Enter the final PIN below. Only when you enter PIN will the
                   phone keypad appear.
                 </p>
               </ManorCardHeader>
@@ -271,7 +271,7 @@ print(f"The PIN is: {result}")`;
                     id="userCode"
                     value={userCode}
                     onChange={(e) => setUserCode(e.target.value)}
-                    placeholder="Type 4177 here to proceed..."
+                    placeholder="Type PIN here to proceed..."
                     className="w-full px-4 py-2 rounded-lg border border-border font-mono text-sm bg-input/50 focus:border-primary"
                     disabled={solved}
                   />
@@ -312,7 +312,7 @@ print(f"The PIN is: {result}")`;
             <PhoneKeypad
               onComplete={handleKeypadComplete}
               title="Enter the 4-Digit PIN"
-              description="Use the keypad to enter 4177"
+              description="Use the keypad to enter PIN"
             />
           </motion.div>
         )}
