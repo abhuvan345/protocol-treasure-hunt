@@ -151,7 +151,7 @@ print(f"The PIN is: {result}")`;
     } else {
       toast({
         title: "Incorrect Code",
-        description: "Only the exact PIN '4177' will unlock the phone keypad.",
+        description: "Only the exact PIN will unlock the phone keypad.",
         variant: "destructive",
       });
     }
