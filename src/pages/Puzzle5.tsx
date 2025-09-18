@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+puzzle5.tsx import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Layout } from '@/components/Layout';
-import { ManorCard, ManorCardContent, ManorCardHeader, ManorCardTitle } from '@/components/ui/manor-card';
+import { ManorCard, ManorCardContent, ManorCardDescription, ManorCardHeader, ManorCardTitle } from '@/components/ui/manor-card';
 import { ManorButton } from '@/components/ui/manor-button';
 import { Badge } from '@/components/ui/badge';
 import { MessageSquare, Search, CheckCircle } from 'lucide-react';
@@ -141,16 +141,19 @@ const Puzzle5 = () => {
   };
 
   const handleSubmit = async () => {
-    const found = selectedContradictions.filter(c => correctContradictions.includes(c));
+    // Check if exactly the first 3 contradictions are selected
+    const firstThreeContradictions = correctContradictions.slice(0, 3);
+    const correctlySelected = firstThreeContradictions.every(c => selectedContradictions.includes(c));
+    const onlyFirstThreeSelected = selectedContradictions.length === 3 && correctlySelected;
     
-    if (found.length >= 3) {
+    if (onlyFirstThreeSelected) {
       const newProgress = { ...progress, p5: true, currentPage: 5 };
       await saveGameProgress(newProgress);
       setProgress(newProgress);
       setPuzzleSolved(true);
       
       toast({
-        title: "🕵 Contradictions Found!",
+        title: "🕵️ Contradictions Found!",
         description: "The lies have been exposed! Proceeding to digital investigation...",
         duration: 3000,
       });
@@ -167,8 +170,8 @@ const Puzzle5 = () => {
       }, 2000);
     } else {
       toast({
-        title: "Insufficient Evidence",
-        description: `You need to identify at least 3 contradictions to expose the lies. Found: ${found.length}/3`,
+        title: "Incorrect Selection",
+        description: "You must select exactly the first 3 contradictions to expose the lies.",
         variant: "destructive",
       });
     }
@@ -269,7 +272,7 @@ const Puzzle5 = () => {
             </div>
             
             <div className="text-center pt-4">
-              <ManorButton onClick={handleSubmit} disabled={selectedContradictions.length < 3}>
+              <ManorButton onClick={handleSubmit} disabled={selectedContradictions.length !== 3}>
                 Expose the Lies
               </ManorButton>
             </div>
