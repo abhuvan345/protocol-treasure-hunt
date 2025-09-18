@@ -203,10 +203,10 @@ const Puzzle7 = () => {
                     Assign each letter a number from 0-25 (A=0, B=1, ... Z=25).
                   </p>
                   <p className="text-muted-foreground max-w-2xl mx-auto font-detective">
-                    The decryption formula is: (numericalvalue - key) % 26.
+                    The decryption formula is: (numericalvalue + key) % 26.
                   </p>
                   <p className="text-muted-foreground max-w-2xl mx-auto font-detective">
-                    For this puzzle, you already know the key.
+                    Find the key by solving this problem => x^2 = ((3!-2!)/2!)-1
                   </p>
                 </ManorCardContent>
               </ManorCard>
