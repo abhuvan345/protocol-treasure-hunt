@@ -206,7 +206,7 @@ const Puzzle7 = () => {
                     The decryption formula is: (numericalvalue + key) % 26.
                   </p>
                   <p className="text-muted-foreground max-w-2xl mx-auto font-detective">
-                    Find the key by solving this problem => x^2 = ((3!-2!)/2!)-1
+                    Find the key by solving this problem = x^2 = ((3!-2!)/2!)-1
                   </p>
                 </ManorCardContent>
               </ManorCard>
