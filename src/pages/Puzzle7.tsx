@@ -246,7 +246,7 @@ const Puzzle7 = () => {
               <Textarea
                 value={collectedClues}
                 onChange={(e) => setCollectedClues(e.target.value)}
-                placeholder="Enter all clues: DAGGER, MARCEL, CHEF, BONUS..."
+                placeholder="Enter all clues: From your previous puzzles "
                 rows={4}
               />
               <ManorButton onClick={handleCluesSubmit}>Assemble Evidence</ManorButton>
