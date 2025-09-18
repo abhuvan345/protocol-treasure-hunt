@@ -73,6 +73,8 @@ const Puzzle5 = () => {
     'butler-time|maid-sight',
     'chef-kitchen|guest-chef', 
     'doctor-study|lady-drawing',
+    'butler-keys|maid-cleaning',
+    'butler-time|butler-keys'
   ];
 
   // Load game progress
