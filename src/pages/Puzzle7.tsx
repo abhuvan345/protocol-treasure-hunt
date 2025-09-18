@@ -138,7 +138,7 @@ const Puzzle7 = () => {
     } else {
       toast({
         title: 'Incomplete Evidence',
-        description: 'Include key clues: DAGGER, MARCEL, CHEF, BONUS',
+        description: 'Include  clues,
         variant: 'destructive',
       });
     }
