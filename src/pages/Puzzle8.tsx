@@ -227,8 +227,7 @@ const Puzzle8 = () => {
           </div>
 
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto font-detective">
-            A word puzzle guards the location of the murder weapon. Guess the
-            5-letter word that reveals where the killer hid their tools.
+            this is a 5-letter word puzzle try to find the word.
           </p>
         </div>
 
@@ -290,8 +289,7 @@ const Puzzle8 = () => {
           <ManorCardHeader>
             <ManorCardTitle>Mystery Word Puzzle</ManorCardTitle>
             <ManorCardDescription>
-              Attempt {currentRow + 1} of {MAX_GUESSES} | Find the word that
-              reveals the murder weapon's location
+              Attempt {currentRow + 1} of {MAX_GUESSES} | Find the word.
             </ManorCardDescription>
           </ManorCardHeader>
           <ManorCardContent className="space-y-6">
