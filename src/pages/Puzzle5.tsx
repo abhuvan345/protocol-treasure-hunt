@@ -21,25 +21,25 @@ const Puzzle5 = () => {
   const dialogues = [
     {
       id: 'butler-time',
-      suspect: 'Charles (Butler)',
+      suspect: 'Bernard (Butler)',
       statement: '"The lights went out at 8:10 PM sharp. I was in the pantry organizing wine bottles."',
       category: 'timing'
     },
     {
       id: 'maid-sight',
-      suspect: 'Margaret (Maid)',
+      suspect: 'Millice (Maid)',
       statement: '"I saw the butler walking past the library at 8:15 PM. He looked quite nervous."',
       category: 'witness'
     },
     {
       id: 'chef-kitchen',
-      suspect: 'Marcel (Chef)',
+      suspect: 'Claude (Chef)',
       statement: '"I never left the kitchen after 7:30 PM. The roast needed constant attention."',
       category: 'alibi'
     },
     {
       id: 'guest-chef',
-      suspect: 'Lady Victoria (Guest)',
+      suspect: 'Victoria (Guest)',
       statement: '"I saw Marcel in the garden around 8:20 PM. He was washing something at the fountain."',
       category: 'witness'
     },
@@ -57,13 +57,13 @@ const Puzzle5 = () => {
     },
     {
       id: 'butler-keys',
-      suspect: 'Charles (Butler)',
+      suspect: 'Bernard (Butler)',
       statement: '"I locked all the doors at 8:00 PM as usual. No one could enter or leave after that."',
       category: 'security'
     },
     {
       id: 'maid-cleaning',
-      suspect: 'Margaret (Maid)',
+      suspect: 'Millice (Maid)',
       statement: '"I saw Lady Victoria enter through the garden door at 8:30 PM, soaking wet from the rain."',
       category: 'witness'
     }
@@ -73,8 +73,6 @@ const Puzzle5 = () => {
     'butler-time|maid-sight',
     'chef-kitchen|guest-chef', 
     'doctor-study|lady-drawing',
-    'butler-keys|maid-cleaning',
-    'butler-time|butler-keys'
   ];
 
   // Load game progress
@@ -252,7 +250,7 @@ const Puzzle5 = () => {
                   <div className="text-sm text-muted-foreground">Contradiction {index + 1}:</div>
                   <div className="text-foreground">
                     {contradiction === 'butler-time|maid-sight' && 
-                      "Butler claims lights out at 8:10, but maid saw him at 8:15 (impossible in darkness)"
+                      "Butler claims lights out at 8:10, but maid saw him at 8:15."
                     }
                     {contradiction === 'chef-kitchen|guest-chef' && 
                       "Chef claims never left kitchen, but was seen in garden at 8:20"
@@ -264,7 +262,7 @@ const Puzzle5 = () => {
                       "Butler locked all doors at 8:00, but maid saw Lady Victoria enter at 8:30"
                     }
                     {contradiction === 'butler-time|butler-keys' && 
-                      "Butler claims lights out at 8:10 but also says he locked doors at 8:00 (inconsistent timeline)"
+                      "Butler claims lights out at 8:10 but also says he locked doors at 8:00"
                     }
                   </div>
                 </div>
